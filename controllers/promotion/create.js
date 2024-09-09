@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createNotification = void 0;
+exports.createPromotion = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const response_1 = require("../../utilities/response");
 const validateRequest_1 = require("../../utilities/validateRequest");
@@ -12,16 +12,25 @@ const uuid_1 = require("uuid");
 const notifications_1 = require("../../models/notifications");
 const expo_server_sdk_1 = require("expo-server-sdk");
 const sequelize_1 = require("sequelize");
-const notificationSchema_1 = require("../../schemas/notificationSchema");
 const userFcm_1 = require("../../models/userFcm");
-const createNotification = async (req, res) => {
-    const { error, value } = (0, validateRequest_1.validateRequest)(notificationSchema_1.createNotificationSchema, req.body);
+const promotionSchema_1 = require("../../schemas/promotionSchema");
+const promotions_1 = require("../../models/promotions");
+const createPromotion = async (req, res) => {
+    const { error, value } = (0, validateRequest_1.validateRequest)(promotionSchema_1.createPromoSchema, req.body);
     if (error != null) {
         const message = `Invalid request body! ${error.details.map((x) => x.message).join(', ')}`;
         logger_1.default.warn(message);
         return res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json(response_1.ResponseData.error(message));
     }
     try {
+        await notifications_1.NotificationModel.create({
+            notificationId: (0, uuid_1.v4)(),
+            notificationName: value.promotionName,
+            notificationMessage: value.promotionDescription,
+            deleted: 0
+        });
+        value.promotionId = (0, uuid_1.v4)();
+        const promotion = await promotions_1.PromotionModel.create(value);
         const users = await userFcm_1.UserFcmModel.findAll({
             where: {
                 deleted: { [sequelize_1.Op.eq]: 0 }
@@ -33,15 +42,13 @@ const createNotification = async (req, res) => {
                 void sendNotification({
                     expoPushToken: users[i].userFcmId,
                     data: {
-                        title: value.notificationName,
-                        body: value.notificationMessage
+                        title: value.promotionName,
+                        body: value.promotionDescription
                     }
                 });
             }
         }
-        value.notificationId = (0, uuid_1.v4)();
-        const notification = await notifications_1.NotificationModel.create(value);
-        const response = response_1.ResponseData.success(notification);
+        const response = response_1.ResponseData.success(promotion);
         logger_1.default.info('Notification created successfully');
         return res.status(http_status_codes_1.StatusCodes.CREATED).json(response);
     }
@@ -51,7 +58,7 @@ const createNotification = async (req, res) => {
         return res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json(response_1.ResponseData.error(message));
     }
 };
-exports.createNotification = createNotification;
+exports.createPromotion = createPromotion;
 const sendNotification = async ({ expoPushToken, data }) => {
     const expo = new expo_server_sdk_1.Expo({ accessToken: process.env.ACCESS_TOKEN, useFcmV1: false });
     const chunks = expo.chunkPushNotifications([{ to: expoPushToken, ...data }]);

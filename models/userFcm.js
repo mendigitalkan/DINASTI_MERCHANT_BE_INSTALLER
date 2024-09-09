@@ -8,7 +8,7 @@ const zygote_1 = require("./zygote");
 exports.UserFcmModel = _1.sequelize.define('UserFcm', {
     ...zygote_1.ZygoteModel,
     userFcmId: {
-        type: sequelize_1.DataTypes.STRING,
+        type: sequelize_1.DataTypes.TEXT,
         allowNull: false
     }
 }, {

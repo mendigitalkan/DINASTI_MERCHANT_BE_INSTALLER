@@ -17,7 +17,7 @@ exports.MerchantModel = _1.sequelize.define('Merchant', {
         allowNull: false
     },
     merchantLogo: {
-        type: sequelize_1.DataTypes.STRING,
+        type: sequelize_1.DataTypes.TEXT,
         allowNull: false
     }
 }, {

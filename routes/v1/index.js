@@ -11,6 +11,7 @@ const merchantRouter_1 = __importDefault(require("./merchantRouter"));
 const statisticRouter_1 = __importDefault(require("./statisticRouter"));
 const userFcmRouter_1 = __importDefault(require("./userFcmRouter"));
 const notificationRouter_1 = __importDefault(require("./notificationRouter"));
+const promotionRouter_1 = __importDefault(require("./promotionRouter"));
 const apiVersion = '/api/v1';
 const appRouterV1 = (app) => {
     app.get(`${apiVersion}`, async (req, res) => await (0, controllers_1.index)(req, res));
@@ -20,5 +21,6 @@ const appRouterV1 = (app) => {
     app.use(`${apiVersion}/statistic`, statisticRouter_1.default);
     app.use(`${apiVersion}/user-fcm`, userFcmRouter_1.default);
     app.use(`${apiVersion}/notifications`, notificationRouter_1.default);
+    app.use(`${apiVersion}/promotions`, promotionRouter_1.default);
 };
 exports.appRouterV1 = appRouterV1;
